@@ -5,52 +5,51 @@ import Matchers._
 
 class BasicElevatorSpec extends WordSpec {
 
-  "An elevators behaviour" when {
-    object elevator extends ElevatorBehaviour
-    "called" should {
-      "schedule a passenger to be collected" in {
-        val passenger = Passenger(goingToFloor = 9)
-        val toBeCollected =
-          elevator.collectPassengerFrom(4, passenger, Set.empty)
-        toBeCollected should contain((4, passenger))
-      }
+  object elevator extends ElevatorBehaviour
 
-      "schedule a passenger to be left off" in {
-        val passenger = Passenger(goingToFloor = 3)
-        val origTakingTo =
-          Set(Passenger(goingToFloor = 5), Passenger(goingToFloor = 1))
-        val newTakingTo = elevator.takePassengerTo(passenger, origTakingTo)
-        newTakingTo should contain(passenger)
-      }
+  "An elevators behaviour" must {
+    "schedule a passenger to be collected" in {
+      val passenger = Passenger(goingToFloor = 9)
+      val toBeCollected =
+        elevator.collectPassengerFrom(4, passenger, Set.empty)
+      toBeCollected should contain((4, passenger))
+    }
 
-      "collect a passenger" in {
-        val passenger = Passenger(goingToFloor = 9)
-        val origTakingTo =
-          Set(Passenger(goingToFloor = 5), Passenger(goingToFloor = 1))
-        val origToBeCollected =
-          Set((3, passenger), (5, Passenger(goingToFloor = 1)))
-        val (newToBeCollected, newTakingTo) =
-          elevator
-            .passengerCollected(3, passenger, origToBeCollected, origTakingTo)
+    "schedule a passenger to be left off" in {
+      val passenger = Passenger(goingToFloor = 3)
+      val origTakingTo =
+        Set(Passenger(goingToFloor = 5), Passenger(goingToFloor = 1))
+      val newTakingTo = elevator.takePassengerTo(passenger, origTakingTo)
+      newTakingTo should contain(passenger)
+    }
 
-        newTakingTo should contain(passenger)
-        newToBeCollected shouldNot contain((3, passenger))
-      }
+    "collect a passenger" in {
+      val passenger = Passenger(goingToFloor = 9)
+      val origTakingTo =
+        Set(Passenger(goingToFloor = 5), Passenger(goingToFloor = 1))
+      val origToBeCollected =
+        Set((3, passenger), (5, Passenger(goingToFloor = 1)))
+      val (newToBeCollected, newTakingTo) =
+        elevator
+          .passengerCollected(3, passenger, origToBeCollected, origTakingTo)
 
-      "leave a passenger off" in {
-        val passenger = Passenger(goingToFloor = 3)
-        val origTakingTo =
-          Set(
-            passenger,
-            Passenger(goingToFloor = 5),
-            Passenger(goingToFloor = 1)
-          )
-        val (newTakingTo, delivered) =
-          elevator.leavePassengerOff(passenger, origTakingTo, List.empty)
+      newTakingTo should contain(passenger)
+      newToBeCollected shouldNot contain((3, passenger))
+    }
 
-        newTakingTo shouldNot contain(passenger)
-        delivered should contain(passenger)
-      }
+    "leave a passenger off" in {
+      val passenger = Passenger(goingToFloor = 3)
+      val origTakingTo =
+        Set(
+          passenger,
+          Passenger(goingToFloor = 5),
+          Passenger(goingToFloor = 1)
+        )
+      val (newTakingTo, delivered) =
+        elevator.leavePassengerOff(passenger, origTakingTo, List.empty)
+
+      newTakingTo shouldNot contain(passenger)
+      delivered should contain(passenger)
     }
   }
 

@@ -10,4 +10,12 @@ package object elevators {
                            collectFrom: Set[(Int, Passenger)],
                            takeTo: Set[Passenger],
                            delivered: List[Passenger])
+
+  case object ElevatorStateRequest
+  case object Move
+  case object Idle
+  case object Moving
+
+  case class PassengerToCollect(floor: Int, passenger: Passenger)
+
 }
