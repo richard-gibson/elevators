@@ -9,8 +9,10 @@ lazy val elevatorapp =
     .settings(settings)
     .settings(
       libraryDependencies ++= Seq(
-        library.scalaCheck % Test,
-        library.scalaTest  % Test
+        library.akkaActor,
+        library.akkaTest    % Test,
+        library.scalaCheck  % Test,
+        library.scalaTest   % Test
       )
     )
 
@@ -23,10 +25,14 @@ lazy val library =
     object Version {
       val scalaCheck = "1.13.4"
       val scalaTest  = "3.0.1"
+      val akka  = "2.5.2"
     }
-    val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck
-    val scalaTest  = "org.scalatest"  %% "scalatest"  % Version.scalaTest
+    val akkaActor  = "com.typesafe.akka"  %% "akka-actor"   % Version.akka
+    val akkaTest   = "com.typesafe.akka"  %% "akka-testkit" % Version.akka
+    val scalaCheck = "org.scalacheck"     %% "scalacheck"   % Version.scalaCheck
+    val scalaTest  = "org.scalatest"      %% "scalatest"    % Version.scalaTest
 }
+
 
 // *****************************************************************************
 // Settings
@@ -35,8 +41,7 @@ lazy val library =
 lazy val settings =
   commonSettings ++
   scalafmtSettings ++
-  gitSettings ++
-  headerSettings
+  gitSettings
 
 lazy val commonSettings =
   Seq(
@@ -73,16 +78,4 @@ lazy val scalafmtSettings =
 lazy val gitSettings =
   Seq(
     git.useGitDescribe := true
-  )
-
-import de.heikoseeberger.sbtheader.HeaderPattern
-import de.heikoseeberger.sbtheader.license.Apache2_0
-lazy val headerSettings =
-  Seq(
-    headers := Map(
-      "scala" -> (HeaderPattern.cStyleBlockComment,
-                  """|/*
-                     | * Copyright year author
-                     | */""".stripMargin)
-    )
   )
