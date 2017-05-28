@@ -42,9 +42,11 @@ class UntestableElevator(floors: Int) {
   }
 
   def getElevatorState =
-    UntestableElevatorState(currentFloor,
-                            collectingPassengerFrom,
-                            takingPassengersTo)
+    UntestableElevatorState(
+      currentFloor,
+      collectingPassengerFrom,
+      takingPassengersTo
+    )
 
   @tailrec
   final def move(): Unit = {
