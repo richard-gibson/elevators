@@ -11,13 +11,37 @@ class ElevatorActor(floors: Int, notificationListener: ActorRef)
     with ActorLogging
     with ElevatorBehaviour {
 
-  private var collectingPassengerFrom: Set[(Int, Passenger)] = Set.empty
-  private var takingPassengersTo: Set[Passenger] = Set.empty
-  private var passengersDelivered: List[Passenger] = List.empty
-  private var currentFloor: Int = 0
-  private var isMoving: Boolean = false
 
-  override def receive: Receive = {
+  override def receive(): Receive = idleReceive(List.empty, 0)
+
+
+  def movingReceive(collectingPassengerFrom: Set[(Int, Passenger)],
+                    takingPassengersTo: Set[Passenger],
+                    passengersDelivered: List[Passenger],
+                    currentFloor: Int): Receive = {
+    case PassengerToCollect(floor, passenger) =>
+
+      context become movingReceive(collectPassengerFrom(floor, passenger, collectingPassengerFrom),
+        takingPassengersTo, passengersDelivered, currentFloor)
+      self ! Move
+
+    case Move =>
+      val (collectFrom, takeTo, delivered) =
+        genFloorsToVisit(currentFloor, collectingPassengerFrom, takingPassengersTo, passengersDelivered)
+
+      val nextFloor: Option[Int] = (takeTo.headOption map (_.goingToFloor))
+        .orElse(collectFrom.headOption map (_._1))
+      val nextFloorToVisit = getNextFloor(currentFloor, nextFloor)
+
+
+      if (nextFloor.isDefined) {
+        context become movingReceive(collectFrom, takeTo, delivered, nextFloorToVisit)
+        self ! Move
+      } else {
+        context become idleReceive(passengersDelivered, currentFloor)
+        notificationListener ! Idle
+      }
+
     case ElevatorStateRequest =>
       log.info("Elevator state requested")
       sender ! ElevatorState(
@@ -27,45 +51,27 @@ class ElevatorActor(floors: Int, notificationListener: ActorRef)
         passengersDelivered
       )
 
-    case PassengerToCollect(floor, passenger) =>
-      collectingPassengerFrom =
-        collectPassengerFrom(floor, passenger, collectingPassengerFrom)
-      if (!isMoving) {
-        isMoving = true
-        self ! Move
-        notificationListener ! Moving
-      }
-
-    case Move =>
-      val (collectFrom, takeTo, delivered) =
-        genFloorsToVisit(
-          currentFloor,
-          collectingPassengerFrom,
-          takingPassengersTo,
-          passengersDelivered
-        )
-
-      val nextFloor: Option[Int] =
-        (takeTo.headOption map (_.goingToFloor))
-          .orElse(collectFrom.headOption map (_._1))
-      val nextFloorToVisit = getNextFloor(currentFloor, nextFloor)
-
-      collectingPassengerFrom = collectFrom
-      takingPassengersTo = takeTo
-      passengersDelivered = delivered
-
-      if (nextFloor.isDefined) {
-        currentFloor = nextFloorToVisit
-        self ! Move
-      } else {
-        log.info(
-          s"${ElevatorState(currentFloor, collectingPassengerFrom, takingPassengersTo, passengersDelivered)}"
-        )
-        isMoving = false
-        notificationListener ! Idle
-      }
   }
 
+
+  def idleReceive(passengersDelivered: List[Passenger], currentFloor: Int): Receive = {
+    case PassengerToCollect(floor, passenger) =>
+
+      context become movingReceive(collectPassengerFrom(floor, passenger, Set.empty),
+        Set.empty, passengersDelivered, currentFloor)
+      self ! Move
+
+
+    case ElevatorStateRequest =>
+      log.info("Elevator state requested")
+      sender ! ElevatorState(
+        currentFloor,
+        Set.empty,
+        Set.empty,
+        passengersDelivered
+      )
+
+  }
 }
 
 object ElevatorActor {
