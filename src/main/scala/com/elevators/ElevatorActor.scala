@@ -1,6 +1,5 @@
 package com.elevators
 
-import akka.actor.Actor.Receive
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 
 /**
@@ -75,6 +74,6 @@ class ElevatorActor(floors: Int, notificationListener: ActorRef)
 }
 
 object ElevatorActor {
-  def apply(floors: Int, notificationListener: ActorRef): Props =
+  def props(floors: Int, notificationListener: ActorRef): Props =
     Props(new ElevatorActor(floors, notificationListener))
 }
