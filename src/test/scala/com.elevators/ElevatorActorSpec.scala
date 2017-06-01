@@ -6,6 +6,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.testkit.{ ImplicitSender, TestKit, TestProbe }
 import org.scalatest._
+import Matchers._
 import akka.util.Timeout
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -15,7 +16,6 @@ class ElevatorActorSpec
     extends TestKit(ActorSystem("Test-Elevator-System"))
     with ImplicitSender
     with AsyncWordSpecLike
-    with Matchers
     with BeforeAndAfterAll {
 
   implicit val timeout = Timeout(5 seconds)
@@ -27,9 +27,9 @@ class ElevatorActorSpec
   "An Elevator actor" when {
     "called" should {
       val listener = TestProbe("notification-listener")
-      val elevator: ActorRef = system.actorOf(ElevatorActor(7, listener.ref))
-      implicit val ec =
-        ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(4))
+      val elevator: ActorRef =
+        system.actorOf(ElevatorActor.props(7, listener.ref))
+      implicit val ec = system.dispatcher
 
       "collect the calling passenger and deliver to requested floor" in {
         elevator ! PassengerToCollect(1, Passenger(goingToFloor = 9))

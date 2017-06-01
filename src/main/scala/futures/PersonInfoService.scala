@@ -4,9 +4,6 @@ import scala.concurrent.{ duration, Await, Future }
 import scala.concurrent.ExecutionContext.Implicits.global
 import duration._
 
-/**
-  * Created by richardgibson on 31/05/2017.
-  */
 case class Person(pin: Int,
                   firstName: String,
                   lastName: String,

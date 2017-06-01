@@ -1,9 +1,9 @@
 package com.elevators
 
-import org.scalatest.{ Matchers, WordSpec }
+import org.scalatest.{ Matchers, WordSpecLike }
 import Matchers._
 
-class BasicElevatorSpec extends WordSpec {
+class BasicElevatorSpec extends WordSpecLike {
 
   object elevator extends ElevatorBehaviour
 
@@ -88,7 +88,11 @@ class BasicElevatorSpec extends WordSpec {
         elevatorState.delivered should contain(passenger2)
         elevatorState.delivered should contain(passenger3)
       }
+
+
     }
   }
+
+
 
 }
